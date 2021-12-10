@@ -1,26 +1,18 @@
-import React from 'react';
-import logo from './logo.svg';
+import React, {FunctionComponent} from 'react';
 import './App.css';
+import {Col, Container, Row} from "reactstrap";
+import {Paper} from "./Paper";
+import {Sider} from "./Sider";
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
-}
-
-export default App;
+export const App: FunctionComponent = () =>
+    <Container fluid>
+        <Row>
+            <Col xs={12} md={4} lg={2}>
+                <Sider/>
+            </Col>
+            <Col xs={12} md={8}>
+                <Paper title="New idea"/>
+            </Col>
+            <Col xs={0} lg={2}/>
+        </Row>
+    </Container>

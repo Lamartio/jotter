@@ -1,7 +1,7 @@
 import React, {FunctionComponent} from "react";
 import {Card, CardBody} from "reactstrap";
 import Editor from "rich-markdown-editor";
-import {useStore} from "./Store";
+import {useStore} from "./Store+utils";
 import {observer} from "mobx-react-lite";
 
 export const Paper: FunctionComponent = observer(() => {

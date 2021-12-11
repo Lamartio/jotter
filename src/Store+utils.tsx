@@ -2,10 +2,10 @@ import {makeAutoObservable} from "mobx";
 import React, {FunctionComponent} from "react";
 import {storeOf} from "./models/Store";
 
-const store = makeAutoObservable(storeOf())
-const StoreContext = React.createContext(store)
+const storeUtils = makeAutoObservable(storeOf())
+const StoreContext = React.createContext(storeUtils)
 export const StoreProvider: FunctionComponent = ({children}) =>
-    <StoreContext.Provider value={store}>
+    <StoreContext.Provider value={storeUtils}>
         {children}
     </StoreContext.Provider>
 export const useStore = () => React.useContext(StoreContext)

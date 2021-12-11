@@ -1,6 +1,6 @@
 import React, {FunctionComponent} from "react";
 import {Button, ListGroup, ListGroupItem} from "reactstrap";
-import {useStore} from "./Store";
+import {useStore} from "./Store+utils";
 import {observer} from "mobx-react-lite";
 import {Branch, flatten, fold, Leaf, noteTreeOf} from "./noteTreeOf";
 import {arrayOf} from "./utils";

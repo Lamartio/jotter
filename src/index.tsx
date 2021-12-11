@@ -4,7 +4,7 @@ import './index.css';
 import reportWebVitals from './reportWebVitals';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import {App} from "./App";
-import {StoreProvider} from "./Store";
+import {StoreProvider} from "./Store+utils";
 
 ReactDOM.render(
     <React.StrictMode>

@@ -9,7 +9,7 @@ export type Store = {
     addingNote: IPromiseBasedObservable<void> | undefined,
     updatingNote: IPromiseBasedObservable<void> | undefined,
     newNote: () => void
-    select: (note: Note) => void
+    select: (noteId: string) => void
     updateSelectedNote: (value: string) => void
 }
 
@@ -26,8 +26,8 @@ export const storeOf = (): Store => {
 
     return {
         selectedNoteId: undefined,
-        select(note): void {
-            this.selectedNoteId = note.id
+        select(noteId: string): void {
+            this.selectedNoteId = noteId
         },
         notes: fromStream(fire.store.notes.all),
         get selectedNote() {

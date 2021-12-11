@@ -19,19 +19,6 @@ export function noteTreeOf(notes: Note[], depth: number = 0): Item[] {
     return concat(leafs, branches)
 }
 
-export function flatten(items: Item[]): Item[] {
-    return chain(items)
-        .flatMap(item =>
-            item.type === ItemType.leaf
-                ? [item as Item]
-                : [
-                    {...item, children: []},
-                    ...flatten((item as Branch).children)
-                ]
-        )
-        .value()
-}
-
 export enum ItemType {
     leaf = 'leaf',
     branch = 'branch'
@@ -45,16 +32,17 @@ export type Branch = {
     type: ItemType
     depth: number,
 }
+
 export type Leaf = {
+    id: string
     title: string
-    note: Note
     type: ItemType
     depth: number,
 }
-const leafOf = (note: Note, depth: number): Item =>
+const leafOf = ({id, title}: Note, depth: number): Item =>
     ({
-        note,
-        title: note.title,
+        id,
+        title,
         type: ItemType.leaf,
         depth,
     });
@@ -67,20 +55,17 @@ const branchOf = (title: string, depth: number, children: Item[]): Item =>
         depth,
     });
 
-
 type ItemCases<R> = {
     leaf: (leaf: Leaf) => R,
     branch: (branch: Branch) => R
 }
 
-export const fold: <R>(item: Item) => (cases: ItemCases<R>) => R =
-    (item) => {
-        return ({leaf, branch}) => {
-            switch (item.type) {
-                case ItemType.leaf:
-                    return leaf(item as Leaf)
-                case ItemType.branch:
-                    return branch(item as Branch)
-            }
+export const fold: <R>(item: Item, cases: ItemCases<R>) => R =
+    (item, {leaf, branch}) => {
+        switch (item.type) {
+            case ItemType.leaf:
+                return leaf(item as Leaf)
+            case ItemType.branch:
+                return branch(item as Branch)
         }
     }

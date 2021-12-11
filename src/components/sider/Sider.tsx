@@ -33,6 +33,8 @@ export const Sider: FunctionComponent = observer(() => {
             <span className="lead text-center flex-fill">Index</span>
             <Button onClick={() => store.addNote()} className="d-inline-flex align-items-center">
                 <Icon.Plus/>
+
+
             </Button>
         </div>
         <ListGroup flush>

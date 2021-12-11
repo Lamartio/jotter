@@ -1,6 +1,6 @@
 import {fireOf} from "../Fire";
 import {fromPromise, fromStream, IPromiseBasedObservable, IStreamListener, PENDING} from "mobx-utils";
-import {Note, noteOf} from "./Note";
+import {getRandomTitle, Note, noteOf} from "./Note";
 
 export type Store = {
     selectedNoteId: string | undefined,
@@ -9,9 +9,9 @@ export type Store = {
     addingNote: IPromiseBasedObservable<void> | undefined,
     updatingNote: IPromiseBasedObservable<void> | undefined,
     deletingNote: IPromiseBasedObservable<void> | undefined,
-    newNote: () => void
+    addNote: () => void
     select: (noteId: string) => void
-    updateSelectedNote: (value: string) => void
+    updateNote: (value: string) => void
     deleteNote: () => void;
 }
 
@@ -28,7 +28,7 @@ export const storeOf = (): Store => {
 
     return {
         selectedNoteId: undefined,
-        select(noteId: string): void {
+        select(noteId: string) {
             this.selectedNoteId = noteId
         },
         notes: fromStream(fire.store.notes.all),
@@ -37,30 +37,35 @@ export const storeOf = (): Store => {
         },
         addingNote: undefined,
         updatingNote: undefined,
-        newNote() {
-            const adding = this.addingNote;
+        addNote() {
+            const {addingNote} = this;
 
-            if (adding?.state !== PENDING)
-                this.addingNote = fromPromise(fire.store.notes.create().then(undefined), adding)
+            if (addingNote?.state !== PENDING) {
+                const title = getRandomTitle()
+                const note = noteOf(title)
+                const promise = fire.store.notes.set(note);
+
+                this.addingNote = fromPromise(promise, addingNote)
+            }
         },
-        updateSelectedNote(content: string): void {
-            const {selectedNoteId} = this
+        updateNote(content: string): void {
+            const {selectedNoteId, updatingNote} = this
 
-            if ({selectedNoteId}) {
+            if (selectedNoteId) {
                 const note = noteOf(content, selectedNoteId);
                 const updateNote = fire.store.notes.set(note);
 
-                this.updatingNote = fromPromise(updateNote, this.updatingNote)
+                this.updatingNote = fromPromise(updateNote, updatingNote)
             }
         },
         deletingNote: undefined,
         deleteNote(): void {
-            const {selectedNoteId} = this
+            const {selectedNoteId, deletingNote} = this
 
-            if (selectedNoteId) {
+            if (selectedNoteId && deletingNote?.state !== PENDING) {
                 const promise = fire.store.notes.delete(selectedNoteId)
 
-                this.deletingNote = fromPromise(promise, this.deletingNote)
+                this.deletingNote = fromPromise(promise, deletingNote)
             }
         }
     };

@@ -1,7 +1,7 @@
 import React, {FunctionComponent} from 'react';
 import {Col, Container, Row} from "reactstrap";
 import {Sider} from "./sider/Sider";
-import {Paper} from "./Paper";
+import {Paper} from "./paper/Paper";
 
 export const App: FunctionComponent = () =>
     <Container fluid className="p-0 m-0">

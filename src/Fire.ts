@@ -11,7 +11,7 @@ import {
 } from "firebase/firestore";
 import {identity, Observable} from "rxjs";
 import {collectionData} from "rxfire/firestore";
-import {Note, noteOf} from "./models/Note";
+import {Note} from "./models/Note";
 
 const ofType = <T extends {}>(): FirestoreDataConverter<T> => ({
     toFirestore: identity,
@@ -19,7 +19,6 @@ const ofType = <T extends {}>(): FirestoreDataConverter<T> => ({
 });
 
 export type Notes = {
-    create: () => Promise<Note>,
     read: (id: string) => Promise<Note | undefined>,
     readAll: () => Promise<Note[]>,
     all: Observable<Note[]>,
@@ -54,14 +53,6 @@ export function fireOf(config: FirebaseOptions): Fire {
                     const noteRef = doc(notes, note.id);
 
                     await setDoc(noteRef, note)
-                },
-                create: async () => {
-                    const note = noteOf('0001 - new note');
-                    const noteRef = doc(notes, note.id);
-
-                    await setDoc(noteRef, note)
-
-                    return note
                 },
                 read: async (id: string) => {
                     const ref = doc(notes, id);

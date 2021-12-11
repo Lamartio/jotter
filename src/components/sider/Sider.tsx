@@ -31,14 +31,15 @@ export const Sider: FunctionComponent = observer(() => {
     return <div>
         <div className="d-flex flex-row my-2 align-items-center">
             <span className="lead text-center flex-fill">Index</span>
-            <Button onClick={() => store.newNote()} className="d-inline-flex align-items-center"><Icon.Plus /></Button>
+            <Button onClick={() => store.addNote()} className="d-inline-flex align-items-center">
+                <Icon.Plus/>
+            </Button>
         </div>
         <ListGroup flush>
             {flatten(tree).map(item => fold(item, cases))}
         </ListGroup>
     </div>
 })
-
 
 export function flatten(items: Item[]): Item[] {
     return chain(items)

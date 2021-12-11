@@ -1,5 +1,14 @@
 import {FirebaseApp, FirebaseOptions, initializeApp} from "firebase/app";
-import {collection, doc, FirestoreDataConverter, getDoc, getDocs, getFirestore, setDoc} from "firebase/firestore";
+import {
+    collection,
+    deleteDoc,
+    doc,
+    FirestoreDataConverter,
+    getDoc,
+    getDocs,
+    getFirestore,
+    setDoc
+} from "firebase/firestore";
 import {identity, Observable} from "rxjs";
 import {collectionData} from "rxfire/firestore";
 import {Note, noteOf} from "./models/Note";
@@ -15,6 +24,7 @@ export type Notes = {
     readAll: () => Promise<Note[]>,
     all: Observable<Note[]>,
     set: (note: Note) => Promise<void>
+    delete(id: string): Promise<void>;
 }
 
 export type FireStore = {
@@ -26,7 +36,7 @@ export type Fire = {
     store: FireStore
 }
 
-export function fireOf(config: FirebaseOptions) : Fire {
+export function fireOf(config: FirebaseOptions): Fire {
     const app = initializeApp(config)
     const firestore = getFirestore(app)
     const notes = collection(firestore, 'notes').withConverter(ofType<Note>())
@@ -35,6 +45,11 @@ export function fireOf(config: FirebaseOptions) : Fire {
         app,
         store: {
             notes: {
+                async delete(id: string) {
+                    const noteRef = doc(notes, id);
+
+                    await deleteDoc(noteRef)
+                },
                 async set(note: Note) {
                     const noteRef = doc(notes, note.id);
 
@@ -59,7 +74,7 @@ export function fireOf(config: FirebaseOptions) : Fire {
                     return refs.docs.map(s => s.data())
                 },
                 get all(): Observable<Note[]> {
-                   return collectionData(notes)
+                    return collectionData(notes)
                 }
             }
         }

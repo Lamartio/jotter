@@ -8,9 +8,11 @@ export type Store = {
     notes: IStreamListener<Note[] | undefined>,
     addingNote: IPromiseBasedObservable<void> | undefined,
     updatingNote: IPromiseBasedObservable<void> | undefined,
+    deletingNote: IPromiseBasedObservable<void> | undefined,
     newNote: () => void
     select: (noteId: string) => void
     updateSelectedNote: (value: string) => void
+    deleteNote: () => void;
 }
 
 export const storeOf = (): Store => {
@@ -42,13 +44,23 @@ export const storeOf = (): Store => {
                 this.addingNote = fromPromise(fire.store.notes.create().then(undefined), adding)
         },
         updateSelectedNote(content: string): void {
-            const {selectedNote} = this
+            const {selectedNoteId} = this
 
-            if (selectedNote) {
-                const note = noteOf(content, selectedNote.id);
+            if ({selectedNoteId}) {
+                const note = noteOf(content, selectedNoteId);
                 const updateNote = fire.store.notes.set(note);
 
                 this.updatingNote = fromPromise(updateNote, this.updatingNote)
+            }
+        },
+        deletingNote: undefined,
+        deleteNote(): void {
+            const {selectedNoteId} = this
+
+            if (selectedNoteId) {
+                const promise = fire.store.notes.delete(selectedNoteId)
+
+                this.deletingNote = fromPromise(promise, this.deletingNote)
             }
         }
     };

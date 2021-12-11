@@ -9,7 +9,7 @@ export const App: FunctionComponent = () =>
             <Col xs={12} md={4} lg={2}>
                 <Sider/>
             </Col>
-            <Col xs={12} md={8} className="p-4">
+            <Col xs={12} md={8}>
                 <Paper/>
             </Col>
             <Col xs={0} lg={2}/>

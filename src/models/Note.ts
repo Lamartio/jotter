@@ -1,6 +1,6 @@
-import {v4 as guid} from "uuid";
 import {identity} from "rxjs";
 import {random} from "lodash";
+import {guid} from "../utils";
 
 export type Note = {
     id: string

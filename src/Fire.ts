@@ -7,6 +7,8 @@ import {
     getDoc,
     getDocs,
     getFirestore,
+    orderBy,
+    query,
     setDoc
 } from "firebase/firestore";
 import {identity, Observable} from "rxjs";
@@ -65,7 +67,7 @@ export function fireOf(config: FirebaseOptions): Fire {
                     return refs.docs.map(s => s.data())
                 },
                 get all(): Observable<Note[]> {
-                    return collectionData(notes)
+                    return collectionData(query(notes, orderBy('title')))
                 }
             }
         }

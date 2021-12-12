@@ -1,15 +1,19 @@
 import {fireOf} from "../Fire";
 import {fromPromise, fromStream, IPromiseBasedObservable, IStreamListener, PENDING} from "mobx-utils";
 import {getRandomTitle, Note, noteOf} from "./Note";
+import {flatten, Item, ItemType, Leaf, noteTreeOf} from "../noteTreeOf";
 
 export type Store = {
     selectedNoteId: string | undefined,
     selectedNote: Note | undefined,
     notes: IStreamListener<Note[] | undefined>,
+    tree: Item[],
     addingNote: IPromiseBasedObservable<void> | undefined,
     updatingNote: IPromiseBasedObservable<void> | undefined,
     deletingNote: IPromiseBasedObservable<void> | undefined,
-    addNote: () => void
+    addNote: () => void,
+    invalidateSelectedNote: (noteId?: string) => void,
+    ensureSelectedNote: (noteId?: string) => void,
     select: (noteId: string) => void
     updateNote: (value: string) => void
     deleteNote: () => void;
@@ -35,6 +39,9 @@ export const storeOf = (): Store => {
         get selectedNote() {
             return this.notes.current?.find(n => n.id === this.selectedNoteId)
         },
+        get tree() {
+            return noteTreeOf(this.notes.current ?? [])
+        },
         addingNote: undefined,
         updatingNote: undefined,
         addNote() {
@@ -43,9 +50,25 @@ export const storeOf = (): Store => {
             if (addingNote?.state !== PENDING) {
                 const title = getRandomTitle()
                 const note = noteOf(title)
-                const promise = fire.store.notes.set(note);
+                const promise = fire.store.notes.set(note).then(() => this.invalidateSelectedNote(note.id));
 
                 this.addingNote = fromPromise(promise, addingNote)
+            }
+        },
+        invalidateSelectedNote(noteId?: string): void {
+            this.selectedNoteId = undefined
+            this.ensureSelectedNote(noteId)
+        },
+        ensureSelectedNote(noteId?: string): void {
+            if (!this.selectedNoteId) {
+                if (!noteId) {
+                    const tree = this.tree;
+                    const item = flatten(tree).find(item => item.type === ItemType.leaf)
+                    const leaf = item as (Leaf | undefined)
+                    noteId = leaf?.id
+                }
+
+                this.selectedNoteId = noteId
             }
         },
         updateNote(content: string): void {
@@ -63,7 +86,7 @@ export const storeOf = (): Store => {
             const {selectedNoteId, deletingNote} = this
 
             if (selectedNoteId && deletingNote?.state !== PENDING) {
-                const promise = fire.store.notes.delete(selectedNoteId)
+                const promise = fire.store.notes.delete(selectedNoteId).then(() => this.invalidateSelectedNote());
 
                 this.deletingNote = fromPromise(promise, deletingNote)
             }

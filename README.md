@@ -1,3 +1,13 @@
+| TODO                                                            | DOING | DONE |
+|-----------------------------------------------------------------|-------|------|
+| Tree should have TreeItems                                      |       |      |
+| Tree should in the models dir                                   |       |      |
+| Leafs should be a note and have selected property               |       |      |
+| Make a stream that combines the selected id with incoming notes |       |      |
+| Refactor UI to react to the new stream                          |       |      |
+| Maybe we should only fetch the content of the selected item?    |       |      |
+
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).

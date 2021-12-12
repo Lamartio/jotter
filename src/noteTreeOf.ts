@@ -39,6 +39,19 @@ export type Leaf = {
     type: ItemType
     depth: number,
 }
+
+export function flatten(items: Item[]): Item[] {
+    return chain(items)
+        .flatMap(item =>
+            item.type === ItemType.leaf
+                ? [item as Item]
+                : [
+                    {...item, children: []},
+                    ...flatten((item as Branch).children)
+                ]
+        )
+        .value()
+}
 const leafOf = ({id, title}: Note, depth: number): Item =>
     ({
         id,

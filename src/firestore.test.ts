@@ -1,5 +1,6 @@
 import {deleteApp} from "firebase/app";
 import {Fire, fireOf} from "./Fire";
+import {noteOf} from "./models/Note";
 
 
 let fire: Fire
@@ -18,7 +19,8 @@ beforeAll(() => {
 afterAll(async () => await deleteApp(fire.app))
 
 test('Create a note and get it for comparison', async () => {
-    const note = await fire.store.notes.create()
+    const note = noteOf('hello')
+    await fire.store.notes.set(note)
     const remoteNote = await fire.store.notes.read(note.id)
 
     expect(note).toStrictEqual(remoteNote)

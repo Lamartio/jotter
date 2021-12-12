@@ -40,6 +40,5 @@ export function getRandomTitle(): string {
     const index = random(0, length - 1, false)
     const title = titles[index]
 
-    console.log(length, index, title)
     return `0001 ${title}`
 }

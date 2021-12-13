@@ -1,7 +1,7 @@
 import {fireOf} from "../Fire";
 import {fromPromise, fromStream, IPromiseBasedObservable, IStreamListener, PENDING} from "mobx-utils";
 import {getRandomTitle, noteOf} from "./Note";
-import {Tree, treeChangesOf} from "./Tree";
+import {Tree, treeStreamOf} from "./Tree";
 import {Subject} from "rxjs";
 
 export type Store = {
@@ -25,15 +25,13 @@ export const storeOf = (): Store => {
         appId: "1:1002517214550:web:1ced8a9032303b3cc392f7",
     }
     const fire = fireOf(config)
-    const selectedNoteIdChanges = new Subject<string | undefined>()
-
-    const treeStream = treeChangesOf(fire.store.notes.all, selectedNoteIdChanges);
+    const selectedNoteIdStream = new Subject<string | undefined>()
+    const treeStream = treeStreamOf(fire.store.notes.streamOfAll, selectedNoteIdStream);
 
     return {
-        select: (noteId: string) => selectedNoteIdChanges.next(noteId),
+        select: (noteId: string) => selectedNoteIdStream.next(noteId),
         tree: fromStream(treeStream),
         addingNote: undefined,
-        updatingNote: undefined,
         addNote() {
             const {addingNote} = this;
 
@@ -45,6 +43,7 @@ export const storeOf = (): Store => {
                 this.addingNote = fromPromise(promise, addingNote)
             }
         },
+        updatingNote: undefined,
         updateNote(content: string): void {
             const {updatingNote} = this
             const selectedNoteId = this.tree.current?.selected?.id
@@ -62,9 +61,10 @@ export const storeOf = (): Store => {
             const selectedNoteId = this.tree.current?.selected?.id
 
             if (selectedNoteId && deletingNote?.state !== PENDING) {
-                const promise = fire.store.notes.delete(selectedNoteId)
-
-                this.deletingNote = fromPromise(promise, deletingNote)
+                this.deletingNote = fromPromise(
+                    fire.store.notes.delete(selectedNoteId),
+                    deletingNote
+                )
             }
         }
     };

@@ -23,7 +23,7 @@ const ofType = <T extends {}>(): FirestoreDataConverter<T> => ({
 export type Notes = {
     read: (id: string) => Promise<Note | undefined>,
     readAll: () => Promise<Note[]>,
-    all: Observable<Note[]>,
+    streamOfAll: Observable<Note[]>,
     set: (note: Note) => Promise<void>
     delete(id: string): Promise<void>;
 }
@@ -66,7 +66,7 @@ export function fireOf(config: FirebaseOptions): Fire {
 
                     return refs.docs.map(s => s.data())
                 },
-                get all(): Observable<Note[]> {
+                get streamOfAll(): Observable<Note[]> {
                     return collectionData(query(notes, orderBy('title')))
                 }
             }

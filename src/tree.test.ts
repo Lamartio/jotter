@@ -1,4 +1,4 @@
-import {itemsOf, tree, treeChangesOf} from "./models/Tree";
+import {itemsOf, tree, treeStreamOf} from "./models/Tree";
 import {lastValueFrom, of, toArray} from "rxjs";
 
 const notes = [
@@ -85,7 +85,7 @@ test('A magnificent stream of notes combined with selectNote events', async () =
     const notesChanges = of(notes)
     const leafId = notes[0]?.id;
     const selectedNoteIdChanges = of(leafId)
-    const stream = treeChangesOf(notesChanges, selectedNoteIdChanges);
+    const stream = treeStreamOf(notesChanges, selectedNoteIdChanges);
     const result = await lastValueFrom(stream.pipe(toArray()))
 
     expect(result[0].selected?.id).toBeUndefined()

@@ -93,20 +93,21 @@ export const fold: <R>(item: Item, cases: ItemCases<R>) => R =
     }
 
 export type Tree = { selected: Leaf | undefined, items: Item[] }
-export const treeChangesOf: (notesChanges: Observable<Note[]>, selectedNoteIdChanges: Observable<string | undefined>) => Observable<Tree> =
-    (noteChanges, selectedNoteIdChanges) => noteChanges.pipe(
-        combineLatestWith(selectedNoteIdChanges.pipe(startWith(undefined))),
-        map(([notes, selectedId]) => {
-            const items = itemsOf(notes).map(item =>
-                item.type === ItemType.leaf
-                    ? ({...item, isSelected: (item as Leaf)?.id === selectedId})
-                    : item
-            )
-            const selected = items.find(item => (item as Leaf | undefined)?.isSelected) as (Leaf | undefined)
+export const treeStreamOf: (notesStream: Observable<Note[]>, selectedNoteIdStream: Observable<string | undefined>) => Observable<Tree> =
+    (notesStream, selectedNoteIdStream) =>
+        notesStream.pipe(
+            combineLatestWith(selectedNoteIdStream.pipe(startWith(undefined))),
+            map(([notes, selectedId]) => {
+                const items = itemsOf(notes).map(item =>
+                    item.type === ItemType.leaf
+                        ? ({...item, isSelected: (item as Leaf)?.id === selectedId})
+                        : item
+                )
+                const selected = items.find(item => (item as Leaf | undefined)?.isSelected) as (Leaf | undefined)
 
-            return {selected, items};
-        })
-    )
+                return {selected, items};
+            })
+        )
 
 export function itemsOf(notes: Note[], depth: number = 0): Item[] {
     const isLeaf = (note: Note) => depth >= note.path.length - 1

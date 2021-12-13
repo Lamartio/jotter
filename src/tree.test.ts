@@ -1,4 +1,4 @@
-import {flatTree, tree, treeChangesOf} from "./models/Tree";
+import {itemsOf, tree, treeChangesOf} from "./models/Tree";
 import {lastValueFrom, of, toArray} from "rxjs";
 
 const notes = [
@@ -75,7 +75,7 @@ test('making a recursive beauty for the tree like index', () => {
 })
 
 test('making a recursive beauty for a flat index', () => {
-    const tosti = flatTree(notes);
+    const tosti = itemsOf(notes);
 
     console.log(tosti)
     expect(tosti).toBeTruthy()

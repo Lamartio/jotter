@@ -16,7 +16,7 @@ type PaperProps = {
 const Paper: FunctionComponent<PaperProps> =
     ({note, onChange}) =>
         <div className="h-100 overflow-auto">
-        <Header/>
+            <Header/>
             <Card className="m-2 border-0 shadow">
                 <CardBody>
                     <MarkdownEditor
@@ -46,7 +46,7 @@ const EmptyEditor: FunctionComponent<{ addNote: () => void }> = ({addNote}) =>
 
 export const Editor: FunctionComponent = observer(() => {
         const store = useStore()
-        const {selectedNote} = store
+        const selectedNote = store.tree.current?.selected
 
         return selectedNote
             ? <Paper note={selectedNote} onChange={value => store.updateNote(value)}/>

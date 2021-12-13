@@ -1,5 +1,6 @@
 import {chain, concat} from "lodash";
 import {Note} from "./Note";
+import {combineLatestWith, map, Observable, startWith} from "rxjs";
 
 export function tree(notes: Note[], depth: number = 0): Item[] {
     const isLeaf = (note: Note) => depth >= note.path.length - 1
@@ -19,12 +20,34 @@ export function tree(notes: Note[], depth: number = 0): Item[] {
     return concat(leafs, branches)
 }
 
+export function flatTree(notes: Note[], depth: number = 0): Item[] {
+    const isLeaf = (note: Note) => depth >= note.path.length - 1
+    const isBranch = (note: Note) => !isLeaf(note)
+    const leafs = chain(notes)
+        .filter(isLeaf)
+        .map(note => leafOf(note, depth))
+        .orderBy(i => i.title)
+        .value()
+    const branches = chain(notes)
+        .filter(isBranch)
+        .groupBy(note => note.path[depth])
+        .map((notes, title) => ({title, notes}))
+        .orderBy(b => b.title)
+        .flatMap(({title, notes}) => [
+            dirOf(title, depth),
+            ...flatTree(notes, depth + 1)
+        ])
+        .value()
+
+    return [...leafs, ...branches]
+}
+
 export enum ItemType {
     leaf = 'leaf',
     branch = 'branch'
 }
 
-export type Item = Branch | Leaf
+export type Item = (Branch | Leaf)
 
 export type Branch = {
     title: string
@@ -33,11 +56,10 @@ export type Branch = {
     depth: number,
 }
 
-export type Leaf = {
-    id: string
-    title: string
+export type Leaf = Note & {
     type: ItemType
     depth: number,
+    isSelected: boolean
 }
 
 export function flatten(items: Item[]): Item[] {
@@ -52,13 +74,14 @@ export function flatten(items: Item[]): Item[] {
         )
         .value()
 }
-const leafOf = ({id, title}: Note, depth: number): Item =>
+
+const leafOf = (note: Note, depth: number): Item =>
     ({
-        id,
-        title,
-        type: ItemType.leaf,
+        ...note,
         depth,
-    });
+        type: ItemType.leaf,
+        isSelected: false
+    })
 
 const branchOf = (title: string, depth: number, children: Item[]): Item =>
     ({
@@ -66,6 +89,14 @@ const branchOf = (title: string, depth: number, children: Item[]): Item =>
         children,
         type: ItemType.branch,
         depth,
+    });
+
+const dirOf = (title: string, depth: number): Item =>
+    ({
+        title,
+        children: [],
+        depth,
+        type: ItemType.branch,
     });
 
 type ItemCases<R> = {
@@ -82,3 +113,22 @@ export const fold: <R>(item: Item, cases: ItemCases<R>) => R =
                 return branch(item as Branch)
         }
     }
+
+
+export const treeChangesOf: (notesChanges: Observable<Note[]>, selectedNoteIdChanges: Observable<string | undefined>) => Observable<{ selected: Leaf | undefined, tree: Item[] }> =
+    (noteChanges, selectedNoteIdChanges) => noteChanges.pipe(
+        combineLatestWith(selectedNoteIdChanges.pipe(startWith(undefined))),
+        map(([notes, selectedId]) => {
+            const tree = flatTree(notes).map(item =>
+                item.type === ItemType.leaf
+                    ? ({...item, isSelected: (item as Leaf)?.id === selectedId})
+                    : item
+            )
+            const selected = tree.find(item => (item as Leaf | undefined)?.isSelected) as (Leaf | undefined)
+
+            return {
+                selected: selected,
+                tree
+            };
+        })
+    )

@@ -1,4 +1,5 @@
-import {tree} from "./Tree";
+import {flatTree, tree, treeChangesOf} from "./models/Tree";
+import {lastValueFrom, of, toArray} from "rxjs";
 
 const notes = [
     {
@@ -66,7 +67,6 @@ const notes = [
     }
 ]
 
-
 test('making a recursive beauty for the tree like index', () => {
     const tosti = tree(notes);
 
@@ -74,3 +74,20 @@ test('making a recursive beauty for the tree like index', () => {
     expect(tosti).toBeTruthy()
 })
 
+test('making a recursive beauty for a flat index', () => {
+    const tosti = flatTree(notes);
+
+    console.log(tosti)
+    expect(tosti).toBeTruthy()
+})
+
+test('A magnificent stream of notes combined with selectNote events', async () => {
+    const notesChanges = of(notes)
+    const leafId = notes[0]?.id;
+    const selectedNoteIdChanges = of(leafId)
+    const stream = treeChangesOf(notesChanges, selectedNoteIdChanges);
+    const result = await lastValueFrom(stream.pipe(toArray()))
+
+    expect(result[0].selected?.id).toBeUndefined()
+    expect(result[1].selected?.id).toBe(leafId)
+})

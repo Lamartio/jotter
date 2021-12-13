@@ -1,7 +1,8 @@
 import {fireOf} from "../Fire";
 import {fromPromise, fromStream, IPromiseBasedObservable, IStreamListener, PENDING} from "mobx-utils";
 import {getRandomTitle, Note, noteOf} from "./Note";
-import {flatten, Item, ItemType, Leaf, tree} from "./Tree";
+import {flatten, Item, ItemType, Leaf, tree, treeChangesOf} from "./Tree";
+import {Subject} from "rxjs";
 
 export type Store = {
     selectedNoteId: string | undefined,
@@ -29,6 +30,7 @@ export const storeOf = (): Store => {
         appId: "1:1002517214550:web:1ced8a9032303b3cc392f7",
     }
     const fire = fireOf(config)
+    const selectedNoteIdChanges = new Subject<string | undefined>()
 
     return {
         selectedNoteId: undefined,

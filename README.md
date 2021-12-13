@@ -7,8 +7,7 @@
 | | | Make a stream that combines the selected id with incoming notes
 | | | Refactor UI to react to the new stream
 | | | Whenever it returns an observable, name the function with stream
-| | Ensure there is a selected item
-| Maybe we should only fetch the content of the selected item?
+| | | Ensure there is a selected item
 
 
 # Getting Started with Create React App

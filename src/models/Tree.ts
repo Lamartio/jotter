@@ -1,24 +1,6 @@
-import {chain, concat} from "lodash";
+import {chain} from "lodash";
 import {Note} from "./Note";
-import {combineLatestWith, map, Observable, startWith} from "rxjs";
-
-export function tree(notes: Note[], depth: number = 0): Item[] {
-    const isLeaf = (note: Note) => depth >= note.path.length - 1
-    const isBranch = (note: Note) => !isLeaf(note)
-    const leafs = chain(notes)
-        .filter(isLeaf)
-        .map(note => leafOf(note, depth))
-        .orderBy(i => i.title)
-        .value()
-    const branches = chain(notes)
-        .filter(isBranch)
-        .groupBy(note => note.path[depth])
-        .map((notes, title) => branchOf(title, depth, tree(notes, depth + 1)))
-        .orderBy(i => i.title)
-        .value()
-
-    return concat(leafs, branches)
-}
+import {combineLatestWith, Observable, scan, startWith} from "rxjs";
 
 export enum ItemType {
     leaf = 'leaf',
@@ -29,7 +11,6 @@ export type Item = (Branch | Leaf)
 
 export type Branch = {
     title: string
-    children: Item[]
     type: ItemType
     depth: number,
 }
@@ -40,20 +21,7 @@ export type Leaf = Note & {
     isSelected: boolean
 }
 
-export function flatten(items: Item[]): Item[] {
-    return chain(items)
-        .flatMap(item =>
-            item.type === ItemType.leaf
-                ? [item as Item]
-                : [
-                    {...item, children: []},
-                    ...flatten((item as Branch).children)
-                ]
-        )
-        .value()
-}
-
-const leafOf = (note: Note, depth: number): Item =>
+const leafOf = (note: Note, depth: number): Leaf =>
     ({
         ...note,
         depth,
@@ -61,18 +29,9 @@ const leafOf = (note: Note, depth: number): Item =>
         isSelected: false
     })
 
-const branchOf = (title: string, depth: number, children: Item[]): Item =>
+const branchOf = (title: string, depth: number): Branch =>
     ({
         title,
-        children,
-        type: ItemType.branch,
-        depth,
-    });
-
-const dirOf = (title: string, depth: number): Item =>
-    ({
-        title,
-        children: [],
         depth,
         type: ItemType.branch,
     });
@@ -92,29 +51,58 @@ export const fold: <R>(item: Item, cases: ItemCases<R>) => R =
         }
     }
 
-export type Tree = { selected: Leaf | undefined, items: Item[] }
+export type Tree = { selected: Leaf | undefined, items: Item[], notes: Note[] }
+
+const seed: Tree = {selected: undefined, items: [], notes: []}
+
 export const treeStreamOf: (notesStream: Observable<Note[]>, selectedNoteIdStream: Observable<string | undefined>) => Observable<Tree> =
     (notesStream, selectedNoteIdStream) =>
         notesStream.pipe(
             combineLatestWith(selectedNoteIdStream.pipe(startWith(undefined))),
-            map(([notes, selectedId]) => {
-                const items = itemsOf(notes).map(item =>
-                    item.type === ItemType.leaf
-                        ? ({...item, isSelected: (item as Leaf)?.id === selectedId})
-                        : item
-                )
-                const selected = items.find(item => (item as Leaf | undefined)?.isSelected) as (Leaf | undefined)
+            scan(
+                (previous, [notes, selectedId]) => {
+                    const items = getItems(notes, selectedId, previous);
+                    const selected = items.find(item => asLeaf(item)?.isSelected ?? false) as Leaf | undefined
 
-                return {selected, items};
-            })
+                    return {notes, items, selected}
+                },
+                seed
+            )
         )
 
-export function itemsOf(notes: Note[], depth: number = 0): Item[] {
+const asLeaf = (item: Item): Leaf | undefined =>
+    item.type === ItemType.leaf
+        ? item as Leaf
+        : undefined;
+
+// when an item got added; select that one
+// when an item got selected; select that one
+// otherwise select the first one
+function getItems(notes: Note[], selectedId: string | undefined, previous: Tree): Item[] {
+    const addedNotes = notes.filter(n => !previous.notes.some(pn => n.id === pn.id))
+
+    if (addedNotes.length > 0) { // there is a note added, so selected it
+        return itemsOf(notes, leaf => leaf.id === addedNotes[0].id)
+    } else if (selectedId && selectedId !== previous.selected?.id) { // there is another note selected, so select it
+        return itemsOf(notes, leaf => leaf.id === selectedId)
+    } else { // otherwise select first
+        return itemsOf(notes, (leaf, index, depth) => index === 0 && depth === 0)
+    }
+}
+
+type IsSelectedPredicate = (leaf: Leaf, index: number, depth: number) => boolean;
+
+export function itemsOf(notes: Note[], isSelectedPredicate: IsSelectedPredicate = () => false, depth: number = 0): Item[] {
     const isLeaf = (note: Note) => depth >= note.path.length - 1
     const isBranch = (note: Note) => !isLeaf(note)
     const leafs = chain(notes)
         .filter(isLeaf)
-        .map(note => leafOf(note, depth))
+        .map((note, index) => {
+            const leaf = leafOf(note, depth);
+            const isSelected = isSelectedPredicate(leaf, index, depth)
+
+            return ({...leaf, isSelected});
+        })
         .orderBy(i => i.title)
         .value()
     const branches = chain(notes)
@@ -123,8 +111,8 @@ export function itemsOf(notes: Note[], depth: number = 0): Item[] {
         .map((notes, title) => ({title, notes}))
         .orderBy(b => b.title)
         .flatMap(({title, notes}) => [
-            dirOf(title, depth),
-            ...itemsOf(notes, depth + 1)
+            branchOf(title, depth),
+            ...itemsOf(notes, isSelectedPredicate, depth + 1)
         ])
         .value()
 

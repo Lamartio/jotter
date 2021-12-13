@@ -1,4 +1,4 @@
-import {itemsOf, tree, treeStreamOf} from "./models/Tree";
+import {itemsOf, treeStreamOf} from "./models/Tree";
 import {lastValueFrom, of, toArray} from "rxjs";
 
 const notes = [
@@ -66,13 +66,6 @@ const notes = [
         "id": "f24cc2f2-e811-4b6f-8174-f234f0e86b1e"
     }
 ]
-
-test('making a recursive beauty for the tree like index', () => {
-    const tosti = tree(notes);
-
-    console.log(tosti)
-    expect(tosti).toBeTruthy()
-})
 
 test('making a recursive beauty for a flat index', () => {
     const tosti = itemsOf(notes);

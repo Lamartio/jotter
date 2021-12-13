@@ -1,7 +1,7 @@
-import {Note} from "./models/Note";
 import {chain, concat} from "lodash";
+import {Note} from "./Note";
 
-export function noteTreeOf(notes: Note[], depth: number = 0): Item[] {
+export function tree(notes: Note[], depth: number = 0): Item[] {
     const isLeaf = (note: Note) => depth >= note.path.length - 1
     const isBranch = (note: Note) => !isLeaf(note)
     const leafs = chain(notes)
@@ -12,7 +12,7 @@ export function noteTreeOf(notes: Note[], depth: number = 0): Item[] {
     const branches = chain(notes)
         .filter(isBranch)
         .groupBy(note => note.path[depth])
-        .map((notes, title) => branchOf(title, depth, noteTreeOf(notes, depth + 1)))
+        .map((notes, title) => branchOf(title, depth, tree(notes, depth + 1)))
         .orderBy(i => i.title)
         .value()
 

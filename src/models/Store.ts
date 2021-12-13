@@ -1,7 +1,7 @@
 import {fireOf} from "../Fire";
 import {fromPromise, fromStream, IPromiseBasedObservable, IStreamListener, PENDING} from "mobx-utils";
 import {getRandomTitle, Note, noteOf} from "./Note";
-import {flatten, Item, ItemType, Leaf, noteTreeOf} from "../noteTreeOf";
+import {flatten, Item, ItemType, Leaf, tree} from "./Tree";
 
 export type Store = {
     selectedNoteId: string | undefined,
@@ -40,7 +40,7 @@ export const storeOf = (): Store => {
             return this.notes.current?.find(n => n.id === this.selectedNoteId)
         },
         get tree() {
-            return noteTreeOf(this.notes.current ?? [])
+            return tree(this.notes.current ?? [])
         },
         addingNote: undefined,
         updatingNote: undefined,

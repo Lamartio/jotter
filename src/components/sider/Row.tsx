@@ -1,7 +1,7 @@
-import {Leaf} from "../../noteTreeOf";
 import React, {FunctionComponent} from "react";
 import {ListGroupItem} from "reactstrap";
 import {Paddings} from "./utils";
+import {Leaf} from "../../models/Tree";
 
 type RowProps = { leaf: Leaf, isSelected: boolean, select: () => void }
 

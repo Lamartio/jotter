@@ -2,7 +2,7 @@ import React, {FunctionComponent} from "react";
 import {Button, ListGroup} from "reactstrap";
 import {observer} from "mobx-react-lite";
 import {Header} from "./Header";
-import {Branch, flatten, fold, Leaf} from "../../noteTreeOf";
+import {Branch, flatten, fold, Leaf} from "../../models/Tree";
 import {useStore} from "../../Store+utils";
 import {Row} from "./Row";
 import * as Icon from 'react-bootstrap-icons';

@@ -1,4 +1,4 @@
-import {noteTreeOf} from "./noteTreeOf";
+import {tree} from "./Tree";
 
 const notes = [
     {
@@ -68,7 +68,7 @@ const notes = [
 
 
 test('making a recursive beauty for the tree like index', () => {
-    const tosti = noteTreeOf(notes);
+    const tosti = tree(notes);
 
     console.log(tosti)
     expect(tosti).toBeTruthy()

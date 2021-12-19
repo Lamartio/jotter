@@ -14,20 +14,33 @@ type PaperProps = {
 };
 
 const Paper: FunctionComponent<PaperProps> =
-    ({note, onChange}) =>
-        <div className="h-100 overflow-auto">
+    ({note, onChange}) => {
+
+        function handleChange(getValue: () => string | undefined) {
+            try {
+                const value = getValue()
+
+                if (value)
+                    onChange(value)
+            } catch (e) {
+                console.error(e)
+            }
+        }
+
+        return <div className="h-100 overflow-auto">
             <Header/>
             <Card className="m-2 border-0 shadow">
                 <CardBody>
                     <MarkdownEditor
                         key={note.id}
-                        onChange={getValue => onChange(getValue())}
+                        onChange={handleChange}
                         defaultValue={note.content}
                         id="markdown-editor"
                         className="ps-5"/>
                 </CardBody>
             </Card>
-        </div>
+        </div>;
+    }
 
 const EmptyEditor: FunctionComponent<{ addNote: () => void }> = ({addNote}) =>
     <div className="d-flex align-items-center justify-content-center h-100">

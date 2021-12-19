@@ -73,10 +73,7 @@ export const treeStreamOf: (notesStream: Observable<Note[]>, selectedNoteIdStrea
                     const firstLeaf = items.find(i => i.type === ItemType.leaf) as Leaf | undefined
                     const sortedIds = notes.map(n => n.id).sort();
                     const selectedId = getSelectedId(previous, id, notes, firstLeaf?.id, sortedIds);
-                    const selected = items
-                        .filter(i => i.type === ItemType.leaf)
-                        .map(i => i as Leaf)
-                        .find(l => l.id === selectedId);
+                    const selected = getSelected(items, selectedId);
 
                     return {
                         id,
@@ -108,6 +105,13 @@ function getSelectedId(previous: Tree,
         // note removed: select the current or, if that isn't there anymore, the first note
         return notes.find(n => n.id === id)?.id ?? firstLeafId
     }
+}
+
+function getSelected(items: Item[], selectedId: string | undefined) {
+    return items
+        .filter(i => i.type === ItemType.leaf)
+        .map(i => i as Leaf)
+        .find(l => l.id === selectedId);
 }
 
 export function itemsOf(notes: Note[], depth: number = 0): Item[] {

@@ -28,7 +28,7 @@ const Paper: FunctionComponent<PaperProps> =
         }
 
         return <div className="h-100 overflow-auto">
-            <Header/>
+            <Header content={note.content}/>
             <Card className="m-2 border-0 shadow">
                 <CardBody>
                     <MarkdownEditor

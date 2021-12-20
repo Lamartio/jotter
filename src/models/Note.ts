@@ -16,7 +16,7 @@ export function noteOf(content: string, id?: string): Note {
         get path() {
             return content
                 .split('\n', 1)[0]
-                ?.replace(/^\W*/i, '')
+                ?.replace(/^\W*/, '')
                 ?.split(' / ')
                 ?.map(t => t.trim())
                 ?.filter(identity)

@@ -2,21 +2,20 @@ import React, {FunctionComponent} from "react";
 import {Button, ListGroup} from "reactstrap";
 import {observer} from "mobx-react-lite";
 import {Header} from "./Header";
-import {Branch, fold, Leaf} from "../../models/Tree";
+import {Branch, fold, getSelected, Leaf} from "../../models/Tree";
 import {useStore} from "../../Store+utils";
 import {Row} from "./Row";
 import * as Icon from 'react-bootstrap-icons';
 
 export const Sider: FunctionComponent = observer(() => {
     const store = useStore();
-    const selectedNoteId = store.tree.current?.selected?.id
-
+    const selectedNote = getSelected(store.tree)
     const cases = {
         leaf: (leaf: Leaf) =>
             <Row
                 key={leaf.id}
                 leaf={leaf}
-                isSelected={selectedNoteId === leaf.id}
+                isSelected={selectedNote?.id === leaf.id}
                 select={() => store.select(leaf.id)}
             >
                 {leaf.title}
@@ -35,7 +34,7 @@ export const Sider: FunctionComponent = observer(() => {
             </Button>
         </div>
         <ListGroup flush>
-            {store.tree.current?.items?.map(item => fold(item, cases))}
+            {store.tree.map(item => fold(item, cases))}
         </ListGroup>
     </div>
 })

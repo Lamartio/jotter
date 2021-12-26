@@ -6,6 +6,7 @@ import './Paper.css';
 import {useStore} from "../../Store+utils";
 import {Header} from "./Header";
 import {Note} from "../../models/Note";
+import {getSelected} from "../../models/Tree";
 
 
 type PaperProps = {
@@ -59,7 +60,7 @@ const EmptyEditor: FunctionComponent<{ addNote: () => void }> = ({addNote}) =>
 
 export const Editor: FunctionComponent = observer(() => {
         const store = useStore()
-        const selectedNote = store.tree.current?.selected
+        const selectedNote = getSelected(store.tree)
 
         return selectedNote
             ? <Paper note={selectedNote} onChange={value => store.updateNote(value)}/>
